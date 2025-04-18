@@ -52,6 +52,22 @@ def test_big_numbers():
         assert str(obj) == num
         assert Document(obj).dumps() == num
 
+def test_numbers_no_flags():
+    '''
+    Verify expected behavior with no flags - big numbers are converted to
+    python floats.
+    '''
+    for num in test_numbers:
+        obj = Document(num).dumps()
+        assert str(num) == obj
+
+        val = Document(obj).as_obj
+        if num < 2**64 and num >= -2**63:
+            assert val == num
+            assert isinstance(val, (int, float))
+        else:
+            assert isinstance(val, float)
+
 
 def test_numbers_as_raw():
     '''
