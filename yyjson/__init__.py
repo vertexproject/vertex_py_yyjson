@@ -24,13 +24,13 @@ class ReaderFlags(enum.IntFlag):
     #: Allow inf/nan number and literal, case-insensitive, such as 1e999, NaN,
     #: inf, -Infinity
     ALLOW_INF_AND_NAN = 0x10
-    #: Read all numbers a python long integers.
+    #: Read all numbers as Python long integers.
     NUMBERS_AS_RAW = 0x20
     #: Read all numbers as Decimal objects instead of native types. This option
     #: is useful for preserving the exact precision of numbers or for handling
     #: numbers that are too large to fit in a native type.
     NUMBERS_AS_DECIMAL = 0x20 | READER_RAW_AS_DECIMAL
-    #: Read big numbers as python long integers.
+    #: Read big numbers as Python long integers.
     BIGNUM_AS_RAW = 0x80
     #: Like `NUMBERS_AS_DECIMAL`, but only for numbers that are too large to
     #: fit in a native type.
