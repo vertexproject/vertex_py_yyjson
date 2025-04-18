@@ -55,6 +55,21 @@ static inline PyObject *unicode_from_str(const char *src, size_t len) {
   return PyUnicode_DecodeUTF8(src, len, NULL);
 }
 
+static bool is_float(const char * str, size_t str_len) {
+  size_t ii = 0;
+
+  for (ii = 0; ii < str_len; ii++) {
+    switch (str[ii]) {
+      case 'e':
+      case 'E':
+      case '.':
+        return true;
+    }
+  }
+
+  return false;
+}
+
 /**
  * Recursively convert the given value into an equivalent high-level Python
  * object.
@@ -159,25 +174,12 @@ static PyObject *element_to_primitive(yyjson_val *val, bool raw_as_decimal) {
         PyObject *result = PyObject_CallOneArg(YY_DecimalClass, uni);
         Py_DECREF(uni);
         return result;
+
       } else {
-        bool is_float = false;
         size_t str_len = yyjson_get_len(val);
         const char * str = yyjson_get_raw(val);
 
-        for (size_t ii = 0; ii < str_len; ii++) {
-          switch (str[ii]) {
-            case 'e':
-            case 'E':
-            case '.': {
-              is_float = true;
-              break;
-            }
-            default: break;
-          }
-          if (is_float) { break; };
-        }
-
-        if (is_float) {
+        if (is_float(str, str_len)) {
           PyObject *uni = unicode_from_str(str, str_len);
           PyObject *result = PyFloat_FromString(uni);
           Py_DECREF(uni);
@@ -185,6 +187,7 @@ static PyObject *element_to_primitive(yyjson_val *val, bool raw_as_decimal) {
         } else {
           return PyLong_FromString(str, NULL, 10);
         }
+
       }
     }
     case YYJSON_TYPE_NONE:
@@ -294,25 +297,12 @@ static PyObject *mut_element_to_primitive(yyjson_mut_val *val, bool raw_as_decim
         PyObject *result = PyObject_CallOneArg(YY_DecimalClass, uni);
         Py_DECREF(uni);
         return result;
+
       } else {
-        bool is_float = false;
         size_t str_len = yyjson_mut_get_len(val);
         const char * str = yyjson_mut_get_raw(val);
 
-        for (size_t ii = 0; ii < str_len; ii++) {
-          switch (str[ii]) {
-            case 'e':
-            case 'E':
-            case '.': {
-              is_float = true;
-              break;
-            }
-            default: break;
-          }
-          if (is_float) { break; };
-        }
-
-        if (is_float) {
+        if (is_float(str, str_len)) {
           PyObject *uni = unicode_from_str(str, str_len);
           PyObject *result = PyFloat_FromString(uni);
           Py_DECREF(uni);
@@ -320,6 +310,7 @@ static PyObject *mut_element_to_primitive(yyjson_mut_val *val, bool raw_as_decim
         } else {
           return PyLong_FromString(str, NULL, 10);
         }
+
       }
     }
     case YYJSON_TYPE_NONE:
