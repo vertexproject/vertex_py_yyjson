@@ -54,6 +54,10 @@ def test_big_numbers():
 
 
 def test_numbers_as_raw():
+    '''
+    Verify expected behavior of NUMBERS_AS_RAW - all numbers are deserialized
+    as python ints/floats.
+    '''
     for num in test_numbers:
         obj = Document(num).dumps()
         assert str(num) == obj
@@ -64,6 +68,10 @@ def test_numbers_as_raw():
 
 
 def test_numbers_as_decimal():
+    '''
+    Verify expected behavior of NUMBERS_AS_DECIMAL - all numbers are
+    deserialized as python decimal.Decimals.
+    '''
     for num in test_numbers:
         obj = Document(num).dumps()
         assert str(num) == obj
@@ -74,6 +82,10 @@ def test_numbers_as_decimal():
 
 
 def test_big_numbers_as_raw():
+    '''
+    Verify expected behavior of BIGNUM_AS_RAW - numbers GE 2**64 and LT -2**63
+    are deserialized as python ints/floats.
+    '''
     for num in test_numbers:
         obj = Document(num).dumps()
         assert str(num) == obj
@@ -84,6 +96,10 @@ def test_big_numbers_as_raw():
 
 
 def test_big_numbers_as_decimal():
+    '''
+    Verify expected behavior of BIGNUM_AS_DECIMAL - numbers GE 2**64 and LT
+    -2**63 are deserialized as python decimal.Decimals.
+    '''
     for num in test_numbers:
         obj = Document(num).dumps()
         assert str(num) == obj
@@ -97,6 +113,10 @@ def test_big_numbers_as_decimal():
 
 
 def test_float_inf_nan():
+    '''
+    Verify expected behavior of deserializing Infinity, -Infinity, and NaN
+    special values.
+    '''
     inf = float('inf')
     ninf = float('-inf')
     nan = float('nan')
