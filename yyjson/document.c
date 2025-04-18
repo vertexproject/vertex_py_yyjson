@@ -62,6 +62,8 @@ static bool is_float(const char * str, size_t str_len) {
     switch (str[ii]) {
       case 'e':
       case 'E':
+      case 'n':
+      case 'N':
       case '.':
         return true;
     }

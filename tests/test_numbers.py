@@ -127,12 +127,29 @@ def test_float_inf_nan():
     assert exc.type is ValueError
     assert exc.value.args[0] == mesg
 
-    val = Document(obj, flags=ReaderFlags.ALLOW_INF_AND_NAN).as_obj
+    for flags in (
+        ReaderFlags.ALLOW_INF_AND_NAN,
+        ReaderFlags.ALLOW_INF_AND_NAN | ReaderFlags.BIGNUM_AS_RAW,
+        ReaderFlags.ALLOW_INF_AND_NAN | ReaderFlags.NUMBERS_AS_RAW,
+        ReaderFlags.ALLOW_INF_AND_NAN | ReaderFlags.BIG_NUMBERS_AS_DECIMAL,
+    ):
+        val = Document(obj, flags=flags).as_obj
+        assert isinstance(val, list)
+        assert len(val) == 3
+        assert isinstance(val[0], float)
+        assert val[0] == inf
+        assert isinstance(val[1], float)
+        assert val[1] == ninf
+        assert isinstance(val[2], float)
+        assert math.isnan(val[2])
+
+    flags = ReaderFlags.ALLOW_INF_AND_NAN | ReaderFlags.NUMBERS_AS_DECIMAL
+    val = Document(obj, flags=flags).as_obj
     assert isinstance(val, list)
     assert len(val) == 3
-    assert isinstance(val[0], float)
-    assert val[0] == inf
-    assert isinstance(val[1], float)
-    assert val[1] == ninf
-    assert isinstance(val[2], float)
+    assert isinstance(val[0], decimal.Decimal)
+    assert val[0] == decimal.Decimal(inf)
+    assert isinstance(val[1], decimal.Decimal)
+    assert val[1] == decimal.Decimal(ninf)
+    assert isinstance(val[2], decimal.Decimal)
     assert math.isnan(val[2])
