@@ -17,11 +17,19 @@ test_numbers = [
     -2.0,
     2**63,
     -2**63,
+    -2**63-1,
     2**64,
     -2**64,
+    2**64+1,
     2**128,
+    2**128+1,
     -2**128,
+    -2**128-1,
 ]
+
+
+def is_bignum(num):
+    return -2**63 <= num < 2**64
 
 
 def test_big_numbers():
@@ -62,7 +70,7 @@ def test_numbers_no_flags():
         assert str(num) == obj
 
         val = Document(obj).as_obj
-        if num < 2**64 and num >= -2**63:
+        if is_bignum(num):
             assert val == num
             assert isinstance(val, (int, float))
         else:
@@ -122,7 +130,7 @@ def test_big_numbers_as_decimal():
 
         val = Document(obj, flags=ReaderFlags.BIG_NUMBERS_AS_DECIMAL).as_obj
         assert val == num
-        if num < 2**64 and num >= -2**63:
+        if is_bignum(num):
             assert not isinstance(val, decimal.Decimal)
         else:
             assert isinstance(val, decimal.Decimal)
