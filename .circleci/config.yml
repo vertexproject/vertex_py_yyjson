@@ -210,13 +210,16 @@ commands:
 
 jobs:
 
-  python311:
+  python3:
+    parameters:
+      python-version:
+        type: string
+
     resource_class: xlarge
     docker:
-      - image: cimg/python:3.11
+      - image: cimg/python:<< parameters.python-version >>
         environment:
-          PYVERS: 3.11
-          RUN_SYNTAX: 1
+          PYVERS: << paraemters.python-version >>
           COVERAGE_FILE: test-reports/<< pipeline.git.revision >>/.coverage
           COVERAGE_ARGS: --cov yyjson --cov-append
 
@@ -226,11 +229,17 @@ jobs:
       - test_steps_python
 
   deploy_pypi:
+    parameters:
+      python-version:
+        type: string
+      python-tag:
+        type: string
+
     docker:
-      - image: cimg/python:3.11
+      - image: << parameters.python-version >>
         environment:
           PYPI_SMOKE_CODE: import yyjson; print(yyjson.__package__)
-          PYTHON_TAG: py311
+          PYTHON_TAG: << parameters.python-tag >>
 
     steps:
       - deploy_pypi_prologue
@@ -245,7 +254,16 @@ workflows:
     unless:
       equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
     jobs:
-      - python311:
+      - python3:
+          python-version: 3.11
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: /.*/
+
+      - python3:
+          python-version: 3.13
           filters:
             tags:
               only: /.*/
@@ -253,8 +271,25 @@ workflows:
               only: /.*/
 
       - deploy_pypi:
+          python-tag: py311
+          python-version: 3.11
           requires:
             - python311
+            - python313
+          context:
+            - PublicPypiAccess
+          filters:
+            tags:
+              only: /^v2\.[0-9]+\.[0-9]+((a|b|rc)[0-9]*)?$/
+            branches:
+              ignore: /.*/
+
+      - deploy_pypi:
+          python-tag: py313
+          python-version: 3.13
+          requires:
+            - python311
+            - python313
           context:
             - PublicPypiAccess
           filters:
@@ -266,6 +301,7 @@ workflows:
       - gh-release/dorelease:
           requires:
             - python311
+            - python313
           context:
             - GithubMachine
           filters:
