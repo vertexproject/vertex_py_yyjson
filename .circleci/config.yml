@@ -21,21 +21,21 @@ commands:
             chmod +x codecov
             # Activate our venv and generate a xml report
             . venv/bin/activate
-            python -m coverage xml
+            python -m coverage xml -o test-reports/coverage.xml
             # Execute the binary...
             ./codecov \
               -t "${CODECOV_TOKEN}" \
               -n "${CODECOV_PREFIX}${PYVERS}node${CIRCLE_NODE_INDEX}" \
               -F python \
-              -f ./coverage.xml \
+              -f test-reports/coverage.xml \
               -v \
               -Z || echo 'Codecov upload failed'
-            gcovr --xml gcoverage.xml
+            gcovr --xml test-reports/gcoverage.xml
             ./codecov \
               -t "${CODECOV_TOKEN}" \
               -n "${CODECOV_PREFIX}${PYVERS}node${CIRCLE_NODE_INDEX}" \
               -F c-ext \
-              -f ./gcoverage.xml \
+              -f test-reports/gcoverage.xml \
               -v \
               -Z || echo 'Codecov upload failed'
 
