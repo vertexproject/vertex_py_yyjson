@@ -364,6 +364,13 @@ static inline yyjson_mut_val *mut_primitive_to_element(
     while (PyDict_Next(obj, &i, &key, &value)) {
       Py_ssize_t str_len;
       const char *str = PyUnicode_AsUTF8AndSize(key, &str_len);
+      if (yyjson_unlikely(str == NULL)) {
+        PyErr_Format(PyExc_TypeError,
+            "Dictionary keys must be strings",
+            Py_TYPE(obj)->tp_name
+        );
+        return NULL;
+      }
       object_value = mut_primitive_to_element(self, doc, value);
       if (yyjson_unlikely(object_value == NULL)) {
         return NULL;
