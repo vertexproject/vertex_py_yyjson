@@ -255,6 +255,7 @@ workflows:
       equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
     jobs:
       - python3:
+          name: python311
           python-version: "3.11"
           filters:
             tags:
@@ -263,6 +264,7 @@ workflows:
               only: /.*/
 
       - python3:
+          name: python313
           python-version: "3.13"
           filters:
             tags:
@@ -271,10 +273,12 @@ workflows:
               only: /.*/
 
       - deploy_pypi:
+          name: deploy311
           python-tag: py311
           python-version: "3.11"
           requires:
-            - python3
+            - python311
+            - python313
           context:
             - PublicPypiAccess
           filters:
@@ -284,10 +288,12 @@ workflows:
               ignore: /.*/
 
       - deploy_pypi:
+          name: deploy313
           python-tag: py313
           python-version: "3.13"
           requires:
-            - python3
+            - python311
+            - python313
           context:
             - PublicPypiAccess
           filters:
@@ -298,7 +304,8 @@ workflows:
 
       - gh-release/dorelease:
           requires:
-            - python3
+            - python311
+            - python313
           context:
             - GithubMachine
           filters:
