@@ -31,7 +31,6 @@ classifiers = [
 
 [project.urls]
 Homepage = 'https://vertex.link'
-Documentation = 'https://synapse.docs.vertex.link'
 Repository = 'https://github.com/vertexproject/vertex_py_yyjson'
 
 [project.optional-dependencies]
