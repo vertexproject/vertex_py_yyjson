@@ -274,8 +274,7 @@ workflows:
           python-tag: py311
           python-version: "3.11"
           requires:
-            - python311
-            - python313
+            - python3
           context:
             - PublicPypiAccess
           filters:
