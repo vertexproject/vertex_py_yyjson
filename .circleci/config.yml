@@ -219,7 +219,7 @@ jobs:
     docker:
       - image: cimg/python:<< parameters.python-version >>
         environment:
-          PYVERS: << paraemters.python-version >>
+          PYVERS: << parameters.python-version >>
           COVERAGE_FILE: test-reports/<< pipeline.git.revision >>/.coverage
           COVERAGE_ARGS: --cov yyjson --cov-append
 
