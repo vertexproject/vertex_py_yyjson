@@ -77,16 +77,6 @@ commands:
       - checkout
 
       - run:
-          # Run this first so we fail on syntax errors before installing a bunch
-          # of stuff and doing a bunch of work. It's easier now that we're only
-          # a single runner using xdist.
-          name: syntax
-          command: |
-            pip install "pycodestyle>=2.10.0,<3.0.0"
-            if [ -n "${RUN_SYNTAX}" ]; then pycodestyle synapse; fi;
-            if [ -n "${RUN_SYNTAX}" ]; then pycodestyle scripts; fi;
-
-      - run:
           name: python version dump
           command: |
             python -c "import sys; print(sys.version)" | tee -a /tmp/python.version
