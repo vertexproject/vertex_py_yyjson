@@ -284,6 +284,8 @@ PyTypeObject *type_for_conversion(PyObject *obj) {
     return &PyDict_Type;
   } else if (obj->ob_type == &PyList_Type) {
     return &PyList_Type;
+  } else if (obj->ob_type == &PyTuple_Type) {
+    return &PyTuple_Type;
   } else if (obj->ob_type == &PyBool_Type) {
     return &PyBool_Type;
   } else if (obj->ob_type == Py_None->ob_type) {
@@ -347,6 +349,19 @@ static inline yyjson_mut_val *mut_primitive_to_element(
     yyjson_mut_val *object_value = NULL;
     for (Py_ssize_t i = 0; i < PyList_GET_SIZE(obj); i++) {
       object_value = mut_primitive_to_element(self, doc, PyList_GET_ITEM(obj, i));
+
+      if (yyjson_unlikely(object_value == NULL)) {
+        return NULL;
+      }
+
+      yyjson_mut_arr_append(val, object_value);
+    }
+    return val;
+  } else if (ob_type == &PyTuple_Type) {
+    yyjson_mut_val *val = yyjson_mut_arr(doc);
+    yyjson_mut_val *object_value = NULL;
+    for (Py_ssize_t i = 0; i < PyTuple_GET_SIZE(obj); i++) {
+      object_value = mut_primitive_to_element(self, doc, PyTuple_GET_ITEM(obj, i));
 
       if (yyjson_unlikely(object_value == NULL)) {
         return NULL;

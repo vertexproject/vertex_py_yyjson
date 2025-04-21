@@ -152,6 +152,30 @@ def test_document_boolean_type():
     assert doc.dumps() == "[false]"
     assert doc.as_obj == [False]
 
+def test_document_list_type():
+    doc = Document('[1,2,3,4]')
+    assert doc.dumps() == '[1,2,3,4]'
+    assert doc.as_obj == [1, 2, 3, 4]
+
+    doc = Document([1, 2, 3, 4])
+    assert doc.dumps() == '[1,2,3,4]'
+    assert doc.as_obj == [1, 2, 3, 4]
+
+def test_document_tuple_type():
+    doc = Document(())
+    assert doc.dumps() == '[]'
+
+    doc = Document((1,))
+    assert doc.dumps() == '[1]'
+
+    doc = Document((1, 2, 3, 4))
+    assert doc.dumps() == '[1,2,3,4]'
+
+    doc = Document([(1, 2), (3, 4)])
+    assert doc.dumps() == '[[1,2],[3,4]]'
+
+    doc = Document({'test': (1, 2)})
+    assert doc.dumps() == '{"test":[1,2]}'
 
 def test_document_none_type():
     """
