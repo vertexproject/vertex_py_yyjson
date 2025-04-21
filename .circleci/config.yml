@@ -21,21 +21,21 @@ commands:
             chmod +x codecov
             # Activate our venv and generate a xml report
             . venv/bin/activate
-            python -m coverage xml -o test-reports/coverage.xml
+            python -m coverage xml -o coverage.xml
             # Execute the binary...
             ./codecov \
               -t "${CODECOV_TOKEN}" \
               -n "${CODECOV_PREFIX}${PYVERS}node${CIRCLE_NODE_INDEX}" \
               -F python \
-              -f test-reports/coverage.xml \
+              -f ./coverage.xml \
               -v \
               -Z || echo 'Codecov upload failed'
-            gcovr --xml test-reports/gcoverage.xml --txt
+            gcovr --xml gcoverage.xml --txt
             ./codecov \
               -t "${CODECOV_TOKEN}" \
               -n "${CODECOV_PREFIX}${PYVERS}node${CIRCLE_NODE_INDEX}" \
               -F c-ext \
-              -f test-reports/gcoverage.xml \
+              -f ./gcoverage.xml \
               -v \
               -Z || echo 'Codecov upload failed'
 
@@ -53,7 +53,7 @@ commands:
           name: install yyjson
           command: |
             . venv/bin/activate
-            CFLAGS="--coverage -g -O0" python3 -m pip install -U --upgrade-strategy=eager -e .
+            CFLAGS="--coverage -g -O0" python3 -m pip install -U --upgrade-strategy=eager .
 
   do_test_execution:
     description: "Execute unit tests via pytest"
@@ -94,10 +94,10 @@ commands:
 
       - do_test_execution
 
+      - do_report_coverage
+
       - store_test_results:
           path: test-reports
-
-      - do_report_coverage
 
       - store_artifacts:
           path: test-reports
