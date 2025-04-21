@@ -366,9 +366,6 @@ static inline yyjson_mut_val *mut_primitive_to_element(
   if (ob_type == &PyUnicode_Type) {
     Py_ssize_t str_len;
     const char *str = PyUnicode_AsUTF8AndSize(obj, &str_len);
-    if (yyjson_unlikely(str == NULL)) {
-      return NULL;
-    }
     return yyjson_mut_strncpy(doc, str, str_len);
   } else if (ob_type == &PyLong_Type) {
     // Serialization of integers is a little special, since Python allows
