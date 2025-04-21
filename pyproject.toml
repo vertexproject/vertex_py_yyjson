@@ -30,8 +30,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = 'https://vertex.link'
-Repository = 'https://github.com/vertexproject/vertex_py_yyjson'
+Homepage = "https://vertex.link"
+Repository = "https://github.com/vertexproject/vertex_py_yyjson"
 
 [project.optional-dependencies]
 test = ["pytest"]
