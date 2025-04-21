@@ -190,6 +190,27 @@ def test_document_none_type():
     assert doc.as_obj == [None]
 
 
+def test_document_dict_type():
+    """
+    Ensure we can load and dump the dict type.
+    """
+    doc = Document('{"a": "b"}')
+    assert doc.dumps() == '{"a":"b"}'
+    assert doc.as_obj == {'a': 'b'}
+
+    doc = Document({"a": "b"})
+    assert doc.dumps() == '{"a":"b"}'
+    assert doc.as_obj == {'a': 'b'}
+
+    with pytest.raises(TypeError) as exc:
+        doc = Document({1: 'b'})
+    assert exc.value.args[0] == 'Dictionary keys must be strings'
+
+    with pytest.raises(TypeError) as exc:
+        doc = Document({'\ud83d\ude47': 'foo'})
+    assert exc.value.args[0] == 'Dictionary keys must be strings'
+
+
 def test_document_get_pointer():
     """
     Ensure JSON pointers work.

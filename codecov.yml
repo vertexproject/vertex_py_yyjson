@@ -1,5 +1,13 @@
+coverage:
+  status:
+    project: true
+    patch:
+      default:
+        target: 100%
+
 flag_management:
   default_rules:
     carryforward: true
+
 ignore:
   - "tests/*"
