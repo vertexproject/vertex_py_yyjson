@@ -26,7 +26,7 @@ commands:
             ./codecov \
               -t "${CODECOV_TOKEN}" \
               -n "${CODECOV_PREFIX}${PYVERS}node${CIRCLE_NODE_INDEX}" \
-              -F python \
+              -F "${PYVERS}" \
               -f ./coverage.xml \
               -v \
               -Z || echo 'Codecov upload failed'
@@ -34,7 +34,7 @@ commands:
             ./codecov \
               -t "${CODECOV_TOKEN}" \
               -n "${CODECOV_PREFIX}${PYVERS}node${CIRCLE_NODE_INDEX}" \
-              -F c-ext \
+              -F "${PYVERS}-ext" \
               -f ./gcoverage.xml \
               -v \
               -Z || echo 'Codecov upload failed'
