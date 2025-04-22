@@ -112,22 +112,12 @@ commands:
           command: |
             python -c "import sys; print(sys.version)" | tee -a /tmp/python.version
 
-      - restore_cache:
-          keys:
-            - v5-venv-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-{{ checksum "pyproject.toml" }}-{{ checksum "/tmp/python.version" }}
-
       - run:
           name: install python dependencies
           command: |
             python3 -m venv venv
             . venv/bin/activate
-            python3 -m pip install -U wheel pip setuptools twine build
-            python3 -m pip install -U -r requirements_dev.txt
-
-      - save_cache:
-          paths:
-            - ./venv
-          key: v5-venv-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-{{ checksum "pyproject.toml" }}-{{ checksum "/tmp/python.version" }}
+            python3 -m pip install -U wheel pip setuptools twine build "cibuildwheel>=v2.23.2,<3.0.0"
 
       - run:
           name: init .pypirc
@@ -136,21 +126,6 @@ commands:
             echo -e "username = $PYPI_USERNAME" >> ~/.pypirc
             echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
 
-      - run:
-          name: set commit
-          command: |
-            . venv/bin/activate
-            python ./scripts/replace_commit.py
-
-  deploy_pypi_tag_verify:
-    description: "Verify the git tag"
-    steps:
-      - run:
-          name: verify git tag vs. version
-          command: |
-            . venv/bin/activate
-            python ./scripts/verify_version.py
-
   deploy_pypi_sdist_build:
     description: "Build sdist packages for pypi"
     steps:
@@ -158,14 +133,14 @@ commands:
           name: create packages
           command: |
             . venv/bin/activate
-            python -m build --sdist
+            python -m build --sdist --outdir ./wheelhouse
 
       - run:
           name: smoke packages
           command: |
             mkdir -p /tmp/sdisttest
             python3 -m venv /tmp/sdisttest/venv
-            cp dist/*.tar.gz /tmp/sdisttest
+            cp wheelhouse/*.tar.gz /tmp/sdisttest
             cd /tmp/sdisttest
             . ./venv/bin/activate
             python3 -m pip install -U pip twine setuptools
@@ -181,23 +156,7 @@ commands:
           name: create packages
           command: |
             . venv/bin/activate
-            export DIST_EXTRA_CONFIG=/tmp/build-opts.cfg
-            echo -e "[bdist_wheel]\npython_tag=$PYTHON_TAG" > $DIST_EXTRA_CONFIG
-            python -m build --wheel
-
-      - run:
-          name: smoke packages
-          command: |
-            mkdir -p /tmp/wheeltest
-            python3 -m venv /tmp/wheeltest/venv
-            cp dist/*.whl /tmp/wheeltest
-            cd /tmp/wheeltest
-            . ./venv/bin/activate
-            python3 -m pip install -U wheel pip twine setuptools
-            python3 -m twine check *.whl
-            python3 -m pip install *.whl
-            python3 -c "$PYPI_SMOKE_CODE"
-            deactivate
+            cibuildwheel
 
   deploy_pypi_upload:
     description: "Upload packages to pypi"
@@ -206,6 +165,7 @@ commands:
           name: upload to pypi
           command: |
             . venv/bin/activate
+            ls -ltha ./wheelhouse
             twine upload dist/*
 
 jobs:
@@ -228,24 +188,32 @@ jobs:
     steps:
       - test_steps_python
 
-  deploy_pypi:
-    parameters:
-      python-version:
-        type: string
-      python-tag:
-        type: string
+  deploy_pypi_linux:
 
     docker:
-      - image: << parameters.python-version >>
+      - image: cimg/python:3.12
         environment:
           PYPI_SMOKE_CODE: import yyjson; print(yyjson.__package__)
-          PYTHON_TAG: << parameters.python-tag >>
 
     steps:
+      - setup_remote_docker
       - deploy_pypi_prologue
-      - deploy_pypi_tag_verify
       - deploy_pypi_wheel_build
       - deploy_pypi_sdist_build
+      - deploy_pypi_upload
+
+  deploy_pypi_macos:
+    macos:
+      xcode: 15.4.0
+    resource_class: macos.m1.medium.gen1
+
+    steps:
+      - run:
+          name: run software update
+          command: |
+            sudo softwareupdate --install-rosetta --agree-to-license
+      - deploy_pypi_prologue
+      - deploy_pypi_wheel_build
       - deploy_pypi_upload
 
 workflows:
@@ -272,10 +240,7 @@ workflows:
             branches:
               only: /.*/
 
-      - deploy_pypi:
-          name: deploy311
-          python-tag: py311
-          python-version: "3.11"
+      - deploy_pypi_linux:
           requires:
             - python311
             - python313
@@ -287,10 +252,7 @@ workflows:
             branches:
               ignore: /.*/
 
-      - deploy_pypi:
-          name: deploy313
-          python-tag: py313
-          python-version: "3.13"
+      - deploy_pypi_macos:
           requires:
             - python311
             - python313

@@ -50,3 +50,12 @@ ext-modules = [
 ]
 packages = ["yyjson"]
 
+[tool.cibuildwheel]
+test-command = [ 'python -c "import yyjson; print(yyjson.__package__)"' ]
+
+[tool.cibuildwheel.linux]
+build = "cp311-manylinux_x86_64 cp313-manylinux_x86_64"
+
+[tool.cibuildwheel.macos]
+archs = "universal2"
+build = "cp311-* cp313-*"
