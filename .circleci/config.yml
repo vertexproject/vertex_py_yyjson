@@ -210,6 +210,10 @@ jobs:
     resource_class: macos.m1.medium.gen1
 
     steps:
+      - run:
+          name: run software update
+          command: |
+            sudo softwareupdate --install-rosetta --agree-to-license
       - deploy_pypi_prologue
       - deploy_pypi_wheel_build
       - deploy_pypi_upload
