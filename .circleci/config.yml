@@ -196,6 +196,7 @@ jobs:
           PYPI_SMOKE_CODE: import yyjson; print(yyjson.__package__)
 
     steps:
+      - setup_remote_docker
       - deploy_pypi_prologue
       - deploy_pypi_wheel_build
       - deploy_pypi_sdist_build
