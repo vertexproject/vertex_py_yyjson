@@ -191,7 +191,7 @@ jobs:
   deploy_pypi_linux:
 
     docker:
-      - image: cimg/python:3.12
+      - image: cimg/python:3.13
         environment:
           PYPI_SMOKE_CODE: import yyjson; print(yyjson.__package__)
 
@@ -232,6 +232,15 @@ workflows:
               only: /.*/
 
       - python3:
+          name: python312
+          python-version: "3.12"
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: /.*/
+
+      - python3:
           name: python313
           python-version: "3.13"
           filters:
@@ -243,6 +252,7 @@ workflows:
       - deploy_pypi_linux:
           requires:
             - python311
+            - python312
             - python313
           context:
             - PublicPypiAccess
@@ -255,6 +265,7 @@ workflows:
       - deploy_pypi_macos:
           requires:
             - python311
+            - python312
             - python313
           context:
             - PublicPypiAccess
