@@ -166,7 +166,7 @@ commands:
           command: |
             . venv/bin/activate
             ls -ltha ./wheelhouse
-            twine upload dist/*
+            twine upload wheelhouse/*
 
 jobs:
 
