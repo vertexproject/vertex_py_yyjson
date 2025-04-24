@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vtx-yyjson"
-version = "4.1.2"
+version = "4.2.0"
 description = "JSON parser & serializer built on yyjson"
 readme = "README.md"
 authors = [
