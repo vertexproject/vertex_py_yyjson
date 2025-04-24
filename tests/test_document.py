@@ -203,13 +203,33 @@ def test_document_dict_type():
     assert doc.as_obj == {'a': 'b'}
 
     with pytest.raises(TypeError) as exc:
-        doc = Document({1: 'b'})
+        Document({1: 'b'})
     assert exc.value.args[0] == 'Dictionary keys must be strings'
 
     with pytest.raises(TypeError) as exc:
-        doc = Document({'\ud83d\ude47': 'foo'})
+        Document({'\ud83d\ude47': 'foo'})
     assert exc.value.args[0] == 'Dictionary keys must be strings'
 
+    with pytest.raises(TypeError) as exc:
+        Document({'a': 'a', 1: 'b'})
+    assert exc.value.args[0] == 'Dictionary keys must be strings'
+
+    doc = Document({"z": "z", "y": "y", "x": "x"}, flags=ReaderFlags.SORT_KEYS)
+    assert doc.dumps() == '{"x":"x","y":"y","z":"z"}'
+    assert doc.as_obj == {"x": "x", "y": "y", "z": "z"}
+
+    doc = Document([{"z": "z", "y": "y", "x": "x"}], flags=ReaderFlags.SORT_KEYS)
+    assert doc.dumps() == '[{"x":"x","y":"y","z":"z"}]'
+    assert doc.as_obj == [{"x": "x", "y": "y", "z": "z"}]
+
+    with pytest.raises(TypeError) as exc:
+        Document({"z": "z", None: "null"}, flags=ReaderFlags.SORT_KEYS)
+    assert (exc.value.args[0] ==
+            "'<' not supported between instances of 'NoneType' and 'str'")
+
+    with pytest.raises(TypeError) as exc:
+        Document({2: 'a', 1: 'b'}, flags=ReaderFlags.SORT_KEYS)
+    assert exc.value.args[0] == 'Dictionary keys must be strings'
 
 def test_document_get_pointer():
     """

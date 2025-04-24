@@ -10,6 +10,12 @@
     self->i_doc = NULL;                                        \
   }
 
+static inline yyjson_mut_val *mut_primitive_to_element(
+    DocumentObject *self,
+    yyjson_mut_doc *doc,
+    PyObject *obj
+);
+
 static PyObject *mut_element_to_primitive(yyjson_mut_val *val, bool raw_as_decimal);
 static PyObject *element_to_primitive(yyjson_val *val, bool raw_as_decimal);
 
@@ -343,6 +349,112 @@ PyTypeObject *type_for_conversion(PyObject *obj) {
   return NULL;
 }
 
+static inline int _serialize_dict_internal(
+    DocumentObject *self,
+    yyjson_mut_doc *doc,
+    PyObject *obj,
+    PyObject *key,
+    PyObject *value,
+    yyjson_mut_val *val
+) {
+
+  yyjson_mut_val *object_value = NULL;
+  Py_ssize_t str_len = 0;
+  const char *str = PyUnicode_AsUTF8AndSize(key, &str_len);
+
+  if (yyjson_unlikely(str == NULL)) {
+    PyErr_SetString(PyExc_TypeError, "Dictionary keys must be strings");
+    return -1;
+  }
+
+  object_value = mut_primitive_to_element(self, doc, value);
+  if (yyjson_unlikely(object_value == NULL)) {
+    return -1;
+  }
+
+  yyjson_mut_obj_add(
+      val, yyjson_mut_strncpy(doc, str, str_len), object_value
+  );
+
+  return 0;
+}
+
+static inline yyjson_mut_val *serialize_dict(
+    DocumentObject *self,
+    yyjson_mut_doc *doc,
+    PyObject *obj
+) {
+    yyjson_mut_val *retval = NULL;
+    yyjson_mut_val *val = yyjson_mut_obj(doc);
+
+    PyObject *py_key = NULL;
+    PyObject *py_value = NULL;
+
+    if (self->sort_keys) {
+
+      PyObject *py_iter = NULL;
+      PyObject *py_keys = NULL;
+
+      // Get the dict keys as a list
+      py_keys = PyDict_Keys(obj);
+      if (py_keys == NULL) {
+        goto CleanupSorted;
+      }
+
+      // Sort keys in-place
+      if (PyList_Sort(py_keys) != 0) {
+        goto CleanupSorted;
+      }
+
+      // Get list iterator
+      py_iter = PyObject_GetIter(py_keys);
+      if (py_iter == NULL) {
+        goto CleanupSorted;
+      }
+
+      // Iterate over sorted dict keys
+      while ((py_key = PyIter_Next(py_iter))) {
+
+        // Get value from dict
+        py_value = PyDict_GetItemWithError(obj, py_key);
+        if (yyjson_unlikely(py_value == NULL)) {
+          goto CleanupSorted;
+        }
+
+        // Serialize the key/val
+        if (_serialize_dict_internal(self, doc, obj, py_key, py_value, val) != 0) {
+          goto CleanupSorted;
+        }
+
+        // Decref the value from the iterator
+        Py_DECREF(py_key);
+      }
+
+      retval = val;
+
+CleanupSorted:
+      Py_XDECREF(py_key);
+      Py_XDECREF(py_iter);
+      Py_XDECREF(py_keys);
+
+    } else {
+
+      Py_ssize_t i = 0;
+
+      while (PyDict_Next(obj, &i, &py_key, &py_value)) {
+        if (_serialize_dict_internal(self, doc, obj, py_key, py_value, val) != 0) {
+          goto Exit;
+        }
+      }
+
+      retval = val;
+
+    }
+
+Exit:
+    return retval;
+}
+
 /**
  * Recursively convert a Python object into yyjson elements.
  */
@@ -420,30 +532,7 @@ static inline yyjson_mut_val *mut_primitive_to_element(
     }
     return val;
   } else if (ob_type == &PyDict_Type) {
-    yyjson_mut_val *val = yyjson_mut_obj(doc);
-    yyjson_mut_val *object_value = NULL;
-    Py_ssize_t i = 0;
-    PyObject *key, *value;
-
-    while (PyDict_Next(obj, &i, &key, &value)) {
-      Py_ssize_t str_len;
-      const char *str = PyUnicode_AsUTF8AndSize(key, &str_len);
-      if (yyjson_unlikely(str == NULL)) {
-        PyErr_Format(PyExc_TypeError,
-            "Dictionary keys must be strings",
-            Py_TYPE(obj)->tp_name
-        );
-        return NULL;
-      }
-      object_value = mut_primitive_to_element(self, doc, value);
-      if (yyjson_unlikely(object_value == NULL)) {
-        return NULL;
-      }
-      yyjson_mut_obj_add(
-          val, yyjson_mut_strncpy(doc, str, str_len), object_value
-      );
-    }
-    return val;
+    return serialize_dict(self, doc, obj);
   } else if (ob_type == &PyFloat_Type) {
     double dnum = PyFloat_AsDouble(obj);
     if (dnum == -1 && PyErr_Occurred()) return NULL;
@@ -550,6 +639,10 @@ static int Document_init(DocumentObject *self, PyObject *args, PyObject *kwds) {
 #define READER_RAW_AS_DECIMAL 0x100
   self->raw_as_decimal = (r_flag & READER_RAW_AS_DECIMAL) != 0;
   r_flag = r_flag ^ READER_RAW_AS_DECIMAL;
+
+#define READER_SORT_KEYS 0x200
+  self->sort_keys = (r_flag & READER_SORT_KEYS) != 0;
+  r_flag = r_flag ^ READER_SORT_KEYS;
 
   if (default_func && default_func != Py_None && !PyCallable_Check(default_func)) {
     PyErr_SetString(PyExc_TypeError, "default must be callable");
