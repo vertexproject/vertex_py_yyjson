@@ -13,6 +13,8 @@ typedef struct {
   PyObject_HEAD
   /** numbers and bignums as decimal? */
   bool raw_as_decimal;
+  /** serialize dicts with sorted keys? */
+  bool sort_keys;
   /** A mutable document. */
   yyjson_mut_doc* m_doc;
   /** An immutable document. */

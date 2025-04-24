@@ -5,6 +5,7 @@ import enum
 from cyyjson import Document
 
 READER_RAW_AS_DECIMAL = 0x100
+READER_SORT_KEYS = 0x200
 
 class ReaderFlags(enum.IntFlag):
     """
@@ -35,6 +36,8 @@ class ReaderFlags(enum.IntFlag):
     #: Like `NUMBERS_AS_DECIMAL`, but only for numbers that are too large to
     #: fit in a native type.
     BIG_NUMBERS_AS_DECIMAL = 0x80 | READER_RAW_AS_DECIMAL
+    #: Sort the keys of dictionary objects when creating the Document.
+    SORT_KEYS = READER_SORT_KEYS
 
 
 class WriterFlags(enum.IntFlag):
