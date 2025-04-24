@@ -27,7 +27,7 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://vertex.link"
-Repository = "https://github.com/vertexproject/vertex_py_yyjson"
+Repository = "https://github.com/vertexproject/vertex_py_yyjson/tree/vtx_main"
 
 [project.optional-dependencies]
 test = ["pytest"]
