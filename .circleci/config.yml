@@ -202,6 +202,9 @@ jobs:
       - deploy_pypi_sdist_build
       - deploy_pypi_upload
 
+      - store_artifacts:
+          path: wheelhouse
+
   deploy_pypi_macos:
     macos:
       xcode: 15.4.0
@@ -215,6 +218,9 @@ jobs:
       - deploy_pypi_prologue
       - deploy_pypi_wheel_build
       - deploy_pypi_upload
+
+      - store_artifacts:
+          path: wheelhouse
 
 workflows:
   version: 2.1
