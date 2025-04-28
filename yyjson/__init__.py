@@ -79,4 +79,4 @@ def dump(obj, fp, *, default=None):
     fp.write(Document(obj, default=default).dumps())
 
 # Bumped by bumpversion.cfg
-__version__ = '4.2.1'
+__version__ = '4.3.0'
