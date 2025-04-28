@@ -305,3 +305,25 @@ def test_document_freeze():
 
     doc.freeze()
     assert doc.is_thawed is False
+
+def test_document_large_str():
+    s0 = 'V'
+    s1 = s0 * 4096
+    s2 = s1 * 16
+    s3 = s1 + 'asdf'
+
+    for v in (s0, s1, s2, s3):
+        s = ''.join(('"', v, '"'))
+        doc = Document(s)
+        assert doc.as_obj == v
+        assert doc.dumps() == s
+
+        d = {'k': v, v: 'v'}
+        doc = Document(d)
+        assert doc.as_obj == d
+        assert doc.dumps() == f'{{"k":"{v}","{v}":"v"}}'
+
+        l = [v, v]
+        doc = Document(l)
+        assert doc.as_obj == l
+        assert doc.dumps() == f'["{v}","{v}"]'
