@@ -327,3 +327,16 @@ def test_document_large_str():
         doc = Document(l)
         assert doc.as_obj == l
         assert doc.dumps() == f'["{v}","{v}"]'
+
+def test_document_large_dict():
+    n = 2 * 16 + 1
+    d = {}
+    for i in range(n):
+        d[str(i)] = i
+
+    doc = Document(d)
+    assert doc.as_obj == d
+    s = doc.dumps()
+    new_doc = Document(s)
+    assert new_doc.as_obj == d
+    assert new_doc.dumps() == s
