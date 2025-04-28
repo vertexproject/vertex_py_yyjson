@@ -42,7 +42,7 @@ static inline PyObject *unicode_from_str(const char *src, size_t len) {
   // of any optimization in this library.
   //
   // The details of these structures are here:
-https://github.com/python/cpython/blob/main/Include/cpython/unicodeobject.h#L53  //
+  //    https://github.com/python/cpython/blob/main/Include/cpython/unicodeobject.h#L53
 
   // Checking the string for non-ascii characters is faster than counting
   // characters of the whole string because we can return at the first
