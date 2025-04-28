@@ -22,17 +22,13 @@ static PyObject *element_to_primitive(yyjson_val *val, bool raw_as_decimal);
 static PyObject *pathlib = NULL;
 static PyObject *path = NULL;
 
-/**
- * Count the number of UTF-8 characters in the given string.
- */
-static inline size_t num_utf8_chars(const char *src, size_t len) {
-  size_t count = 0;
+static inline bool is_ascii(const char * src, size_t len) {
   for (size_t i = 0; i < len; i++) {
-    if (yyjson_likely(src[i] >> 6 != 2)) {
-      count++;
+    if ((src[i] & 0x80) != 0) {
+      return false;
     }
   }
-  return count;
+  return true;
 }
 
 /**
@@ -47,9 +43,11 @@ static inline PyObject *unicode_from_str(const char *src, size_t len) {
   //
   // The details of these structures are here:
   //    https://github.com/python/cpython/blob/main/Include/cpython/unicodeobject.h#L53
-  size_t num_chars = num_utf8_chars(src, len);
 
-  if (yyjson_likely(num_chars == len)) {
+  // Checking the string for non-ascii characters is faster than counting
+  // characters of the whole string because we can return at the first
+  // non-ascii character.
+  if (yyjson_likely(is_ascii(src, len))) {
     PyObject *uni = PyUnicode_New(len, 127);
     if (!uni) return NULL;
     PyASCIIObject *uni_ascii = (PyASCIIObject *)uni;

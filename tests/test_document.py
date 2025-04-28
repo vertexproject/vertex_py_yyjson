@@ -25,6 +25,13 @@ def test_document_from_str():
     assert doc.as_obj == {"hello": "world"}
 
 
+def test_document_unicode():
+    value = '["bar�"]'
+    doc = Document(value)
+    assert doc.dumps() == value
+    assert doc.as_obj == ['bar�']
+
+
 def test_document_types():
     """Ensure each primitive type can be upcast (which does not have its own
     dedicated test.)"""
