@@ -24,7 +24,7 @@ static PyObject *path = NULL;
 
 static inline bool is_ascii(const char * src, size_t len) {
   for (size_t i = 0; i < len; i++) {
-    if ((src[i] & 0x80) != 0) {
+    if (yyjson_unlikely((src[i] & 0x80) != 0)) {
       return false;
     }
   }
