@@ -31,6 +31,12 @@ def test_document_unicode():
     assert doc.dumps() == value
     assert doc.as_obj == ['bar�']
 
+    value = '["bar\uFFFD"]'
+    doc = Document(value)
+    assert doc.dumps() == value
+    assert doc.as_obj == ['bar�']
+
+    assert doc.dumps(flags=WriterFlags.ESCAPE_UNICODE) == '["bar\uFFFD"]'
 
 def test_document_types():
     """Ensure each primitive type can be upcast (which does not have its own
