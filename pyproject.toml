@@ -55,4 +55,4 @@ build = "cp311-manylinux_x86_64 cp312-manylinux_x86_64 cp313-manylinux_x86_64 cp
 
 [tool.cibuildwheel.macos]
 archs = "universal2"
-build = "cp311-* cp312-* cp313-* cp314"
+build = "cp311-* cp312-* cp313-* cp314-*"
