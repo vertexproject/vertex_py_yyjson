@@ -20,6 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -50,8 +51,8 @@ packages = ["yyjson"]
 test-command = [ 'python -c "import yyjson; print(yyjson.__package__)"' ]
 
 [tool.cibuildwheel.linux]
-build = "cp311-manylinux_x86_64 cp312-manylinux_x86_64 cp313-manylinux_x86_64"
+build = "cp311-manylinux_x86_64 cp312-manylinux_x86_64 cp313-manylinux_x86_64 cp314-manylinux_x86_64"
 
 [tool.cibuildwheel.macos]
 archs = "universal2"
-build = "cp311-* cp312-* cp313-*"
+build = "cp311-* cp312-* cp313-* cp314-*"
