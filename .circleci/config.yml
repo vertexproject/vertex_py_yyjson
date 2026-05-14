@@ -255,11 +255,21 @@ workflows:
             branches:
               only: /.*/
 
+      - python3:
+          name: python314
+          python-version: "3.14"
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: /.*/
+
       - deploy_pypi_linux:
           requires:
             - python311
             - python312
             - python313
+            - python314
           context:
             - PublicPypiAccess
           filters:
@@ -273,6 +283,7 @@ workflows:
             - python311
             - python312
             - python313
+            - python314
           context:
             - PublicPypiAccess
           filters:
