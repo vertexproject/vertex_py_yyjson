@@ -200,7 +200,7 @@ jobs:
       - deploy_pypi_prologue
       - deploy_pypi_wheel_build
       - deploy_pypi_sdist_build
-      - deploy_pypi_upload
+#      - deploy_pypi_upload
 
       - store_artifacts:
           path: wheelhouse
@@ -217,7 +217,7 @@ jobs:
             sudo softwareupdate --install-rosetta --agree-to-license
       - deploy_pypi_prologue
       - deploy_pypi_wheel_build
-      - deploy_pypi_upload
+#      - deploy_pypi_upload
 
       - store_artifacts:
           path: wheelhouse
@@ -276,7 +276,8 @@ workflows:
             tags:
               only: /^v[0-9]+\.[0-9]+\.[0-9]+((a|b|rc)[0-9]*)?$/
             branches:
-              ignore: /.*/
+              - epiphyte/SYN-10687/py314
+#              ignore: /.*/
 
       - deploy_pypi_macos:
           requires:
